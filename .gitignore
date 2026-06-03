@@ -1,5 +1,5 @@
 # Streamlit Secrets (Crucial)
-
+.streamlit/secrets.toml
 
 # Local environment variables
 .env
