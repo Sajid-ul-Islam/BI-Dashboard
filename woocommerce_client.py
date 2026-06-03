@@ -24,13 +24,23 @@ class WooCommerceClient:
         try:
             url = f"{self.api_base_url}/system_status"
             # Attempt system status first
-            response = requests.get(url, auth=self.auth, verify=self.verify_ssl, timeout=10)
+            try:
+                response = requests.get(url, auth=self.auth, verify=self.verify_ssl, timeout=10)
+            except requests.exceptions.SSLError:
+                self.verify_ssl = False
+                response = requests.get(url, auth=self.auth, verify=False, timeout=10)
+                
             if response.status_code == 200:
                 return True, "Successfully connected to WooCommerce REST API."
             
             # Fallback to products if system status endpoint is restricted
             url = f"{self.api_base_url}/products"
-            response = requests.get(url, auth=self.auth, params={"per_page": 1}, verify=self.verify_ssl, timeout=10)
+            try:
+                response = requests.get(url, auth=self.auth, params={"per_page": 1}, verify=self.verify_ssl, timeout=10)
+            except requests.exceptions.SSLError:
+                self.verify_ssl = False
+                response = requests.get(url, auth=self.auth, params={"per_page": 1}, verify=False, timeout=10)
+                
             if response.status_code == 200:
                 return True, "Successfully connected to WooCommerce REST API (Products endpoint)."
             else:
@@ -53,7 +63,12 @@ class WooCommerceClient:
         url = f"{self.api_base_url}/{endpoint}"
         
         while True:
-            response = requests.get(url, auth=self.auth, params=params, verify=self.verify_ssl, timeout=20)
+            try:
+                response = requests.get(url, auth=self.auth, params=params, verify=self.verify_ssl, timeout=20)
+            except requests.exceptions.SSLError:
+                self.verify_ssl = False
+                response = requests.get(url, auth=self.auth, params=params, verify=False, timeout=20)
+                
             if response.status_code != 200:
                 raise Exception(f"WooCommerce API error fetching {endpoint} (page {params['page']}): {response.status_code} - {response.text}")
             
@@ -524,11 +539,28 @@ def load_woocommerce_data(date_range: Optional[Tuple[datetime.date, datetime.dat
         try:
             client = WooCommerceClient(store_url, consumer_key, consumer_secret)
             
-            # Retrieve data from API
-            orders_df = client.get_orders(date_range)
-            products_df = client.get_products()
-            customers_df = client.get_customers()
+            # Retrieve data from API with separate exception zones for resilience
+            try:
+                orders_df = client.get_orders(date_range)
+            except Exception as e_orders:
+                raise Exception(f"Failed to fetch WooCommerce orders: {e_orders}")
+                
+            try:
+                products_df = client.get_products()
+            except Exception as e_prods:
+                raise Exception(f"Failed to fetch WooCommerce products catalog: {e_prods}")
+                
+            try:
+                customers_df = client.get_customers()
+            except Exception as e_custs:
+                # Graceful fallback for restricted access users
+                st.sidebar.warning("⚠️ Restricted API access: Defaulted to empty customers database.")
+                customers_df = client._empty_customers_df()
             
+            # Clear any historical loading error
+            if "api_error" in st.session_state:
+                st.session_state["api_error"] = ""
+                
             return {
                 "orders": orders_df,
                 "products": products_df,
@@ -537,8 +569,8 @@ def load_woocommerce_data(date_range: Optional[Tuple[datetime.date, datetime.dat
                 "store_name": store_url.replace("https://", "").replace("http://", "").split("/")[0]
             }
         except Exception as e:
-            # Log error and fall back to demo mode with warning
-            st.sidebar.error(f"Live API Fetch Error: {str(e)}. Falling back to Demo Mode.")
+            # Capture error details in session state for persistent sidebar diagnostics
+            st.session_state["api_error"] = f"Live API Connection Failed: {str(e)}"
             
     # Demo Mode fallback
     orders_df, products_df, customers_df = generate_mock_data()

@@ -129,26 +129,45 @@ def inject_custom_css():
         border-radius: 8px !important;
     }}
     
-    /* Glowing chat bubbles for RAG system */
-    .chat-bubble-user {{
-        background-color: rgba(99, 102, 241, 0.15);
-        border-left: 4px solid {THEME_COLORS['primary']};
-        padding: 12px 16px;
-        border-radius: 12px;
-        margin-bottom: 12px;
-        font-size: 14px;
-        color: {THEME_COLORS['text_main']};
+    /* Style st.chat_message container with glassmorphic cards styles */
+    [data-testid="stChatMessage"] {{
+        background-color: {THEME_COLORS['card_bg']} !important;
+        border: 1px solid {THEME_COLORS['card_border']} !important;
+        border-radius: 16px !important;
+        padding: 16px !important;
+        margin-bottom: 14px !important;
+        box-shadow: 0 8px 24px -10px rgba(0,0,0,0.4) !important;
+        backdrop-filter: blur(12px) !important;
     }}
     
-    .chat-bubble-ai {{
-        background-color: rgba(255, 255, 255, 0.03);
-        border-left: 4px solid {THEME_COLORS['secondary']};
-        padding: 12px 16px;
-        border-radius: 12px;
-        margin-bottom: 12px;
-        font-size: 14px;
-        color: {THEME_COLORS['text_main']};
-        line-height: 1.6;
+    /* Accent user messages */
+    [data-testid="stChatMessage"]:-webkit-any([class*="user"], [data-testid*="user"]) {{
+        background-color: rgba(99, 102, 241, 0.06) !important;
+        border-left: 3px solid {THEME_COLORS['primary']} !important;
+    }}
+    
+    /* Accent assistant messages */
+    [data-testid="stChatMessage"]:-webkit-any([class*="assistant"], [data-testid*="assistant"]) {{
+        background-color: rgba(16, 185, 129, 0.04) !important;
+        border-left: 3px solid {THEME_COLORS['secondary']} !important;
+    }}
+
+    /* Style st.status widget details */
+    div[data-testid="stStatusWidget"] {{
+        background-color: {THEME_COLORS['card_bg']} !important;
+        border: 1px solid {THEME_COLORS['card_border']} !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
+    }}
+    
+    /* Button Hover Micro-animations */
+    .stButton > button {{
+        border-radius: 8px !important;
+        transition: transform 0.15s ease, background-color 0.2s ease, box-shadow 0.2s ease !important;
+    }}
+    .stButton > button:hover {{
+        transform: translateY(-1.5px);
+        box-shadow: 0 6px 15px rgba(99, 102, 241, 0.25) !important;
     }}
     
     </style>
@@ -176,32 +195,22 @@ def render_kpi_card(title: str, value: str, trend: str = "", trend_direction: st
             text_color = THEME_COLORS["text_muted"]
             arrow = "•"
             
-        trend_html = f"""
-        <span style="
-            background: {badge_color};
-            color: {text_color};
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            margin-left: auto;
-        ">
-            {arrow} {trend}
-        </span>
-        """
+        trend_html = (
+            f'<span style="background: {badge_color}; color: {text_color}; '
+            f'padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: 600; '
+            f'display: inline-flex; align-items: center; gap: 4px; margin-left: auto;">'
+            f'{arrow} {trend}</span>'
+        )
 
-    card_html = f"""
-    <div class="metric-card-container">
-        <div style="display: flex; align-items: center; margin-bottom: 10px;">
-            <span style="color: {THEME_COLORS['text_muted']}; font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">{title}</span>
-            {trend_html}
-        </div>
-        <div style="font-size: 32px; font-weight: 700; color: {THEME_COLORS['text_main']}; letter-spacing: -0.02em;">{value}</div>
-    </div>
-    """
+    card_html = (
+        f'<div class="metric-card-container">'
+        f'<div style="display: flex; align-items: center; margin-bottom: 10px;">'
+        f'<span style="color: {THEME_COLORS["text_muted"]}; font-size: 14px; font-weight: 500; '
+        f'text-transform: uppercase; letter-spacing: 0.05em;">{title}</span>'
+        f'{trend_html}</div>'
+        f'<div style="font-size: 32px; font-weight: 700; color: {THEME_COLORS["text_main"]}; '
+        f'letter-spacing: -0.02em;">{value}</div></div>'
+    )
     return card_html
 
 
