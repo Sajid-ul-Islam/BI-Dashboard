@@ -1,0 +1,32 @@
+# Streamlit Secrets (Crucial)
+.streamlit/secrets.toml
+
+# Local environment variables
+.env
+.env.local
+.env.*
+
+# Python Cache & compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Diagnostic & Scratch files
+scratch_test.py
+scratch/
+test_*.py
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDE / Editor Configurations
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
