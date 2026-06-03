@@ -507,35 +507,81 @@ def generate_mock_data(num_orders: int = 450, num_products: int = 15, num_custom
     return orders_df, products_df, customers_df
 
 
+def get_woocommerce_secrets() -> dict:
+    """
+    Retrieves WooCommerce credentials from st.secrets or manually parses .streamlit/secrets.toml if missing.
+    """
+    # 1. Try Streamlit native secrets
+    try:
+        if "woocommerce" in st.secrets:
+            wc = st.secrets["woocommerce"]
+            if wc.get("store_url") and wc.get("store_url") != "https://your-store.com":
+                return {
+                    "store_url": wc.get("store_url", "").strip(),
+                    "consumer_key": wc.get("consumer_key", "").strip(),
+                    "consumer_secret": wc.get("consumer_secret", "").strip()
+                }
+    except Exception:
+        pass
+
+    # 2. Manual fallback to parse secrets.toml file relative to this script
+    import os
+    app_dir = os.path.dirname(os.path.abspath(__file__))
+    secrets_path = os.path.join(app_dir, ".streamlit", "secrets.toml")
+    
+    if os.path.exists(secrets_path):
+        try:
+            import tomllib
+            with open(secrets_path, "rb") as f:
+                data = tomllib.load(f)
+                if "woocommerce" in data:
+                    wc = data["woocommerce"]
+                    if wc.get("store_url") and wc.get("store_url") != "https://your-store.com":
+                        return {
+                            "store_url": wc.get("store_url", "").strip(),
+                            "consumer_key": wc.get("consumer_key", "").strip(),
+                            "consumer_secret": wc.get("consumer_secret", "").strip()
+                        }
+        except Exception:
+            try:
+                wc = {}
+                with open(secrets_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                import re
+                section = re.search(r'\[woocommerce\](.*?)(\n\[|\Z)', content, re.DOTALL)
+                if section:
+                    lines = section.group(1).split("\n")
+                    for line in lines:
+                        if "=" in line:
+                            k, v = line.split("=", 1)
+                            wc[k.strip()] = v.strip().strip('"').strip("'").strip()
+                if wc.get("store_url") and wc.get("store_url") != "https://your-store.com":
+                    return wc
+            except Exception:
+                pass
+                
+    return {}
+
+
 def load_woocommerce_data(date_range: Optional[Tuple[datetime.date, datetime.date]] = None, use_demo: bool = False) -> Dict[str, pl.DataFrame]:
     """
     Primary data loader function. Checks Streamlit secrets for credentials.
     If credentials exist and use_demo is False, connects to live WooCommerce.
     Otherwise, returns mock datasets. Results are packaged in a dictionary.
     """
-    # Check if credentials exist in secrets
+    # Check if credentials exist in secrets or file fallback
     has_credentials = False
-    store_url = ""
-    consumer_key = ""
-    consumer_secret = ""
+    wc_secrets = {}
     
     if not use_demo:
-        try:
-            if "woocommerce" in st.secrets:
-                store_url = st.secrets["woocommerce"].get("store_url", "")
-                consumer_key = st.secrets["woocommerce"].get("consumer_key", "")
-                consumer_secret = st.secrets["woocommerce"].get("consumer_secret", "")
-                
-                # Check that they aren't the placeholders
-                if (store_url and store_url != "https://your-store.com" and
-                    consumer_key and consumer_key != "ck_your_consumer_key_here" and
-                    consumer_secret and consumer_secret != "cs_your_consumer_secret_here"):
-                    has_credentials = True
-        except Exception:
-            # Secrets file doesn't exist or isn't structured correctly
-            pass
+        wc_secrets = get_woocommerce_secrets()
+        if wc_secrets:
+            has_credentials = True
             
     if has_credentials and not use_demo:
+        store_url = wc_secrets["store_url"]
+        consumer_key = wc_secrets["consumer_key"]
+        consumer_secret = wc_secrets["consumer_secret"]
         try:
             client = WooCommerceClient(store_url, consumer_key, consumer_secret)
             

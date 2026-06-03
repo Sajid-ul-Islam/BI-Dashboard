@@ -5,7 +5,7 @@ import time
 from typing import Tuple, Dict, Any
 
 # Import custom modules
-from woocommerce_client import load_woocommerce_data, WooCommerceClient
+from woocommerce_client import load_woocommerce_data, WooCommerceClient, get_woocommerce_secrets
 from style_utils import inject_custom_css, THEME_COLORS
 
 # Page Configuration
@@ -28,12 +28,6 @@ if "override_llm_key" not in st.session_state:
     st.session_state["override_llm_key"] = ""
 if "override_llm_provider" not in st.session_state:
     st.session_state["override_llm_provider"] = "Gemini"
-if "wc_override_url" not in st.session_state:
-    st.session_state["wc_override_url"] = ""
-if "wc_override_ck" not in st.session_state:
-    st.session_state["wc_override_ck"] = ""
-if "wc_override_cs" not in st.session_state:
-    st.session_state["wc_override_cs"] = ""
 
 # Modern Sidebar Logo (Streamlit 1.33.0+)
 st.logo("assets/logo.svg", icon_image="assets/logo.svg")
@@ -51,25 +45,19 @@ st.sidebar.markdown(
 st.sidebar.subheader("Connection Mode")
 
 # Determine default connection state
-has_secrets = False
-try:
-    if "woocommerce" in st.secrets:
-        wc_secrets = st.secrets["woocommerce"]
-        if (wc_secrets.get("store_url") != "https://your-store.com" and 
-            wc_secrets.get("consumer_key") != "ck_your_consumer_key_here"):
-            has_secrets = True
-except Exception:
-    pass
+wc_secrets = get_woocommerce_secrets()
+has_secrets = len(wc_secrets) > 0
 
 # Choose connection mode
-mode_options = ["Demo Mode (Mock Data)", "Live Store (secrets.toml)"]
-if st.session_state["wc_override_url"] and st.session_state["wc_override_ck"]:
-    mode_options.append("Live Store (Manual Setup)")
+if has_secrets:
+    mode_options = ["Live Store (secrets.toml)", "Demo Mode (Mock Data)"]
+else:
+    mode_options = ["Demo Mode (Mock Data)"]
 
 selected_mode = st.sidebar.radio(
     "Data Source",
     options=mode_options,
-    index=0 if st.session_state["use_demo"] else (1 if has_secrets else 0),
+    index=0,
     key="connection_mode_radio"
 )
 
@@ -167,31 +155,8 @@ def calculate_kpis(orders: pl.DataFrame, start: datetime.date, end: datetime.dat
 current_params = (selected_mode, date_range)
 if "last_loading_params" not in st.session_state or st.session_state["last_loading_params"] != current_params or "orders_df" not in st.session_state:
     with st.spinner("Fetching and processing store data..."):
-        # If using manual credentials overrides
-        if selected_mode == "Live Store (Manual Setup)":
-            try:
-                client = WooCommerceClient(
-                    st.session_state["wc_override_url"],
-                    st.session_state["wc_override_ck"],
-                    st.session_state["wc_override_cs"]
-                )
-                orders_df = client.get_orders(date_range)
-                products_df = client.get_products()
-                customers_df = client.get_customers()
-                data_dict = {
-                    "orders": orders_df,
-                    "products": products_df,
-                    "customers": customers_df,
-                    "is_demo": False,
-                    "store_name": st.session_state["wc_override_url"].replace("https://", "").replace("http://", "").split("/")[0]
-                }
-            except Exception as e:
-                st.sidebar.error(f"Manual connection failed: {e}")
-                st.session_state["use_demo"] = True
-                data_dict = load_woocommerce_data(date_range, use_demo=True)
-        else:
-            # Load from secrets or mock
-            data_dict = load_woocommerce_data(date_range, use_demo=st.session_state["use_demo"])
+        # Load from secrets or mock
+        data_dict = load_woocommerce_data(date_range, use_demo=st.session_state["use_demo"])
         
         st.session_state["orders_df"] = data_dict["orders"]
         st.session_state["products_df"] = data_dict["products"]
