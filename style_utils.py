@@ -4,16 +4,11 @@ import plotly.graph_objects as go
 
 # Define UI Colors
 THEME_COLORS = {
-    "primary": "#6366f1",      # Indigo
+    "primary": "#2563eb",      # Blue
     "secondary": "#10b981",    # Emerald Green
     "accent": "#f43f5e",       # Rose Red
     "warning": "#f59e0b",      # Amber/Yellow
-    "info": "#06b6d4",         # Cyan/Teal
-    "dark_bg": "#0b0f19",      # Sleek Deep Dark Navy/Slate
-    "card_bg": "rgba(20, 24, 38, 0.7)", # Transparent glassmorphic card bg
-    "card_border": "rgba(255, 255, 255, 0.06)",
-    "text_main": "#f8fafc",     # Off-white
-    "text_muted": "#94a3b8"     # Cool Gray
+    "info": "#06b6d4"          # Cyan/Teal
 }
 
 def inject_custom_css():
@@ -27,8 +22,6 @@ def inject_custom_css():
     /* Apply modern font globally */
     html, body, [class*="css"], .stApp {{
         font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        background-color: {THEME_COLORS['dark_bg']};
-        color: {THEME_COLORS['text_main']};
     }}
     
     /* Make app full-width with clean padding */
@@ -43,10 +36,10 @@ def inject_custom_css():
     /* Style Streamlit Tabs for premium feeling */
     .stTabs [data-baseweb="tab-list"] {{
         gap: 12px;
-        background-color: rgba(15, 23, 42, 0.3);
+        background-color: var(--secondary-background-color);
         padding: 6px;
         border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border-color);
     }}
     
     .stTabs [data-baseweb="tab"] {{
@@ -54,7 +47,8 @@ def inject_custom_css():
         white-space: pre-wrap;
         background-color: transparent;
         border-radius: 8px;
-        color: {THEME_COLORS['text_muted']};
+        color: var(--text-color);
+        opacity: 0.7;
         font-weight: 500;
         font-size: 14px;
         border: none !important;
@@ -63,21 +57,21 @@ def inject_custom_css():
     }}
     
     .stTabs [data-baseweb="tab"]:hover {{
-        color: {THEME_COLORS['text_main']};
-        background-color: rgba(255, 255, 255, 0.03);
+        color: var(--text-color);
+        opacity: 1;
+        background-color: var(--secondary-background-color);
     }}
     
     .stTabs [aria-selected="true"] {{
         background-color: {THEME_COLORS['primary']} !important;
         color: white !important;
         font-weight: 600;
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
     }}
     
     /* Clean up the sidebar */
     section[data-testid="stSidebar"] {{
-        background-color: #070a13 !important;
-        border-right: 1px solid rgba(255, 255, 255, 0.05);
+        border-right: 1px solid var(--border-color);
     }}
     
     section[data-testid="stSidebar"] .block-container {{
@@ -86,19 +80,18 @@ def inject_custom_css():
     
     /* Card wrappers */
     div.metric-card-container {{
-        background: {THEME_COLORS['card_bg']};
-        border: 1px solid {THEME_COLORS['card_border']};
+        background: var(--secondary-background-color);
+        border: 1px solid var(--border-color);
         border-radius: 16px;
         padding: 24px;
-        box-shadow: 0 10px 30px -15px rgba(0,0,0,0.5);
-        backdrop-filter: blur(12px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         margin-bottom: 20px;
         transition: transform 0.2s ease, border-color 0.2s ease;
     }}
     
     div.metric-card-container:hover {{
         transform: translateY(-2px);
-        border-color: rgba(99, 102, 241, 0.3);
+        border-color: rgba(37, 99, 235, 0.3);
     }}
     
     /* Style headers */
@@ -108,7 +101,7 @@ def inject_custom_css():
     }}
     
     h1 {{
-        background: linear-gradient(135deg, #ffffff 40%, {THEME_COLORS['primary']} 100%);
+        background: linear-gradient(135deg, var(--text-color) 40%, {THEME_COLORS['primary']} 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-size: 2.2rem !important;
@@ -117,32 +110,31 @@ def inject_custom_css():
     
     /* DataFrame styling overrides */
     .stDataFrame div[data-testid="stTable"] {{
-        border: 1px solid {THEME_COLORS['card_border']} !important;
+        border: 1px solid var(--border-color) !important;
         border-radius: 12px !important;
         overflow: hidden !important;
     }}
     
     /* Text Inputs and Textareas */
     div[data-baseweb="input"] {{
-        background-color: rgba(15, 23, 42, 0.5) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        background-color: var(--secondary-background-color) !important;
+        border: 1px solid var(--border-color) !important;
         border-radius: 8px !important;
     }}
     
     /* Style st.chat_message container with glassmorphic cards styles */
     [data-testid="stChatMessage"] {{
-        background-color: {THEME_COLORS['card_bg']} !important;
-        border: 1px solid {THEME_COLORS['card_border']} !important;
+        background-color: var(--secondary-background-color) !important;
+        border: 1px solid var(--border-color) !important;
         border-radius: 16px !important;
         padding: 16px !important;
         margin-bottom: 14px !important;
-        box-shadow: 0 8px 24px -10px rgba(0,0,0,0.4) !important;
-        backdrop-filter: blur(12px) !important;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
     }}
     
     /* Accent user messages */
     [data-testid="stChatMessage"]:-webkit-any([class*="user"], [data-testid*="user"]) {{
-        background-color: rgba(99, 102, 241, 0.06) !important;
+        background-color: rgba(37, 99, 235, 0.06) !important;
         border-left: 3px solid {THEME_COLORS['primary']} !important;
     }}
     
@@ -154,10 +146,10 @@ def inject_custom_css():
 
     /* Style st.status widget details */
     div[data-testid="stStatusWidget"] {{
-        background-color: {THEME_COLORS['card_bg']} !important;
-        border: 1px solid {THEME_COLORS['card_border']} !important;
+        background-color: var(--secondary-background-color) !important;
+        border: 1px solid var(--border-color) !important;
         border-radius: 12px !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
     }}
     
     /* Button Hover Micro-animations */
@@ -167,7 +159,7 @@ def inject_custom_css():
     }}
     .stButton > button:hover {{
         transform: translateY(-1.5px);
-        box-shadow: 0 6px 15px rgba(99, 102, 241, 0.25) !important;
+        box-shadow: 0 6px 15px rgba(37, 99, 235, 0.25) !important;
     }}
     
     </style>
@@ -192,7 +184,7 @@ def render_kpi_card(title: str, value: str, trend: str = "", trend_direction: st
             arrow = "▼"
         else:
             badge_color = "rgba(148, 163, 184, 0.12)"
-            text_color = THEME_COLORS["text_muted"]
+            text_color = "var(--text-color)"
             arrow = "•"
             
         trend_html = (
@@ -205,10 +197,10 @@ def render_kpi_card(title: str, value: str, trend: str = "", trend_direction: st
     card_html = (
         f'<div class="metric-card-container">'
         f'<div style="display: flex; align-items: center; margin-bottom: 10px;">'
-        f'<span style="color: {THEME_COLORS["text_muted"]}; font-size: 14px; font-weight: 500; '
+        f'<span style="color: var(--text-color); opacity: 0.7; font-size: 14px; font-weight: 500; '
         f'text-transform: uppercase; letter-spacing: 0.05em;">{title}</span>'
         f'{trend_html}</div>'
-        f'<div style="font-size: 32px; font-weight: 700; color: {THEME_COLORS["text_main"]}; '
+        f'<div style="font-size: 32px; font-weight: 700; color: var(--text-color); '
         f'letter-spacing: -0.02em;">{value}</div></div>'
     )
     return card_html
@@ -221,28 +213,22 @@ def apply_plotly_theme(fig):
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Outfit, sans-serif", color=THEME_COLORS["text_main"], size=12),
+        font=dict(family="Outfit, sans-serif", size=12),
         margin=dict(t=40, b=40, l=40, r=20),
         xaxis=dict(
-            gridcolor="rgba(255, 255, 255, 0.05)",
-            zeroline=False,
-            color=THEME_COLORS["text_muted"]
+            zeroline=False
         ),
         yaxis=dict(
-            gridcolor="rgba(255, 255, 255, 0.05)",
-            zeroline=False,
-            color=THEME_COLORS["text_muted"]
+            zeroline=False
         ),
         legend=dict(
-            bgcolor="rgba(10, 15, 30, 0.6)",
-            bordercolor="rgba(255, 255, 255, 0.05)",
+            bgcolor="rgba(0, 0, 0, 0)",
+            bordercolor="rgba(0, 0, 0, 0)",
             borderwidth=1,
-            font=dict(size=10, color=THEME_COLORS["text_main"])
+            font=dict(size=10)
         ),
         hoverlabel=dict(
-            bgcolor="#1e293b",
-            bordercolor="rgba(255, 255, 255, 0.1)",
-            font=dict(color=THEME_COLORS["text_main"], size=12)
+            font=dict(size=12)
         )
     )
     # If traces exist, adjust lines and colors

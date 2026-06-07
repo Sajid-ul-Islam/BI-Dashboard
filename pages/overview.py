@@ -139,7 +139,7 @@ with g_col2:
             "completed": THEME_COLORS["secondary"],
             "processing": THEME_COLORS["primary"],
             "refunded": THEME_COLORS["accent"],
-            "cancelled": THEME_COLORS["text_muted"]
+            "cancelled": "#94a3b8"
         }
         colors = [colors_map.get(s, THEME_COLORS["info"]) for s in status_df["status"].to_list()]
         

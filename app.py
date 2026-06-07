@@ -36,7 +36,7 @@ st.logo("assets/logo.svg", icon_image="assets/logo.svg")
 st.sidebar.markdown(
     f"""
     <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 25px; margin-top: -30px;">
-        <span style="font-size: 20px; font-weight: 700; background: linear-gradient(135deg, #ffffff, {THEME_COLORS['primary']}); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">WooCommerce BI</span>
+        <span style="font-size: 20px; font-weight: 700; background: linear-gradient(135deg, var(--text-color), {THEME_COLORS['primary']}); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">WooCommerce BI</span>
     </div>
     """,
     unsafe_allow_html=True
@@ -190,7 +190,7 @@ st.sidebar.markdown(
     ">
         {status_text}
     </div>
-    <div style="font-size: 11px; text-align: center; color: #94a3b8; margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+    <div style="font-size: 11px; text-align: center; color: var(--text-color); opacity: 0.7; margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
         {store_name}
     </div>
     """,
