@@ -42,7 +42,7 @@ with cust_col1:
             )
             apply_plotly_theme(fig_hist)
             fig_hist.update_layout(yaxis_title="Count of Customers")
-            st.plotly_chart(fig_hist, use_container_width=True)
+            st.plotly_chart(fig_hist, width="stretch")
         else:
             st.info("No active customer spending data found.")
     else:
@@ -80,7 +80,7 @@ with cust_col2:
             hole=0.5
         )
         apply_plotly_theme(fig_cohort)
-        st.plotly_chart(fig_cohort, use_container_width=True)
+        st.plotly_chart(fig_cohort, width="stretch")
     else:
         st.info("No sales data available.")
 
@@ -105,7 +105,7 @@ if not customers_df.is_empty():
             "orders_count": st.column_config.NumberColumn("Total Orders", format="%d"),
             "total_spent": st.column_config.NumberColumn("Lifetime Value", format="$%.2f")
         },
-        use_container_width=True,
+        width="stretch",
         hide_index=True
     )
 else:

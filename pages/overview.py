@@ -125,7 +125,7 @@ with g_col1:
             legend=dict(x=0.01, y=0.99, orientation="h")
         )
         apply_plotly_theme(fig_trend)
-        st.plotly_chart(fig_trend, use_container_width=True)
+        st.plotly_chart(fig_trend, width="stretch")
     else:
         st.info("No sales data available for the selected timeframe.")
 
@@ -152,7 +152,7 @@ with g_col2:
         )
         fig_pie.update_traces(textposition='inside', textinfo='percent+label')
         apply_plotly_theme(fig_pie)
-        st.plotly_chart(fig_pie, use_container_width=True)
+        st.plotly_chart(fig_pie, width="stretch")
     else:
         st.info("No status data available.")
 
@@ -177,7 +177,7 @@ if not orders_df.is_empty():
             "items_count": st.column_config.NumberColumn("Items"),
             "item_names": "Products Purchased"
         },
-        use_container_width=True,
+        width="stretch",
         hide_index=True
     )
 else:

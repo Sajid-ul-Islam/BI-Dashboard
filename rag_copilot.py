@@ -1,7 +1,7 @@
 import streamlit as st
 import polars as pl
 from openai import OpenAI
-from google import genai
+import google.generativeai as genai
 from typing import Dict, List, Any, Optional
 from typing import Tuple, Optional, Any
 

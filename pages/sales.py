@@ -69,7 +69,7 @@ with s_col1:
         )
         apply_plotly_theme(fig_dow)
         fig_dow.update_layout(coloraxis_showscale=False)
-        st.plotly_chart(fig_dow, use_container_width=True)
+        st.plotly_chart(fig_dow, width="stretch")
     else:
         st.info("No sales data available.")
         
@@ -99,6 +99,6 @@ with s_col2:
         apply_plotly_theme(fig_hour)
         fig_hour.update_traces(line_color=THEME_COLORS["info"], fill="tozeroy", fillcolor="rgba(6, 182, 212, 0.05)")
         fig_hour.update_layout(xaxis=dict(tickmode="linear", tick0=0, dtick=2))
-        st.plotly_chart(fig_hour, use_container_width=True)
+        st.plotly_chart(fig_hour, width="stretch")
     else:
         st.info("No sales data available.")

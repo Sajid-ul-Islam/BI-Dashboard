@@ -91,7 +91,7 @@ else: # Custom Range
 date_range = (start_date, end_date)
 
 # Refresh Button
-if st.sidebar.button("↻ Force Sync / Refresh", use_container_width=True):
+if st.sidebar.button("↻ Force Sync / Refresh", width="stretch"):
     st.cache_data.clear()
     if "last_loading_params" in st.session_state:
         del st.session_state["last_loading_params"]

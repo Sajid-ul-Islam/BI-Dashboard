@@ -43,7 +43,7 @@ with p_col1:
         )
         fig_prod.update_layout(yaxis={'categoryorder':'total ascending'}, coloraxis_showscale=False)
         apply_plotly_theme(fig_prod)
-        st.plotly_chart(fig_prod, use_container_width=True)
+        st.plotly_chart(fig_prod, width="stretch")
     else:
         st.info("No product sales data available.")
         
@@ -66,7 +66,7 @@ with p_col2:
             color_discrete_sequence=px.colors.qualitative.Pastel
         )
         apply_plotly_theme(fig_cat)
-        st.plotly_chart(fig_cat, use_container_width=True)
+        st.plotly_chart(fig_cat, width="stretch")
     else:
         st.info("No category data available.")
 
@@ -97,6 +97,6 @@ st.dataframe(
         "stock_status": st.column_config.TextColumn("Stock Status"),
         "total_sales": st.column_config.NumberColumn("Lifetime Units Sold", format="%d")
     },
-    use_container_width=True,
+    width="stretch",
     hide_index=True
 )
