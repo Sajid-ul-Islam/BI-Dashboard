@@ -63,16 +63,33 @@ selected_mode = st.sidebar.radio(
 
 st.session_state["use_demo"] = (selected_mode == "Demo Mode (Mock Data)")
 
+# Initialize active date range in session state to prevent immediate reload on widget change
+today = datetime.date.today()
+if "active_date_range" not in st.session_state:
+    st.session_state["active_date_range"] = (today - datetime.timedelta(days=30), today)
+
 # Global Date Filters
 st.sidebar.subheader("Date Filter")
 date_filter_option = st.sidebar.selectbox(
     "Timeframe",
-    options=["Last 30 Days", "Last 90 Days", "Year to Date", "All Time", "Custom Range"]
+    options=["Today", "Yesterday", "Last 7 Days", "Last 15 Days", "Last 30 Days", "Last 90 Days", "Year to Date", "All Time", "Custom Range"],
+    index=4
 )
 
 # Date calculations
-today = datetime.date.today()
-if date_filter_option == "Last 30 Days":
+if date_filter_option == "Today":
+    start_date = today
+    end_date = today
+elif date_filter_option == "Yesterday":
+    start_date = today - datetime.timedelta(days=1)
+    end_date = today - datetime.timedelta(days=1)
+elif date_filter_option == "Last 7 Days":
+    start_date = today - datetime.timedelta(days=7)
+    end_date = today
+elif date_filter_option == "Last 15 Days":
+    start_date = today - datetime.timedelta(days=15)
+    end_date = today
+elif date_filter_option == "Last 30 Days":
     start_date = today - datetime.timedelta(days=30)
     end_date = today
 elif date_filter_option == "Last 90 Days":
@@ -85,17 +102,26 @@ elif date_filter_option == "All Time":
     start_date = today - datetime.timedelta(days=365) # Mock covers 1 year
     end_date = today
 else: # Custom Range
-    start_date = st.sidebar.date_input("Start Date", today - datetime.timedelta(days=60))
-    end_date = st.sidebar.date_input("End Date", today)
+    custom_dates = st.sidebar.date_input(
+        "Select Date Range", 
+        value=(today - datetime.timedelta(days=60), today),
+        max_value=today
+    )
+    if isinstance(custom_dates, tuple) and len(custom_dates) == 2:
+        start_date, end_date = custom_dates
+    else:
+        start_date = custom_dates[0] if isinstance(custom_dates, tuple) else custom_dates
+        end_date = today
 
-date_range = (start_date, end_date)
+selected_date_range = (start_date, end_date)
 
-# Refresh Button
-if st.sidebar.button("↻ Force Sync / Refresh", width="stretch"):
+# Action Trigger for Filters & Sync
+if st.sidebar.button("🚀 Apply Filters & Sync Data", type="primary", width="stretch"):
+    st.session_state["active_date_range"] = selected_date_range
     st.cache_data.clear()
     if "last_loading_params" in st.session_state:
         del st.session_state["last_loading_params"]
-    st.toast("Cache cleared, reloading fresh data...")
+    st.toast("Applying filters and syncing fresh data...")
     time.sleep(0.5)
     st.rerun()
 
@@ -146,6 +172,11 @@ def calculate_kpis(orders: pl.DataFrame, start: datetime.date, end: datetime.dat
     items_prior = valid_prior["items_count"].sum()
     items_change = ((items_active - items_prior) / items_prior * 100) if items_prior > 0 else 0.0
 
+    # Shipped Orders (completed status within active period)
+    shipped_active = active_orders.filter(pl.col("status") == "completed").height
+    shipped_prior = prior_orders.filter(pl.col("status") == "completed").height
+    shipped_change = ((shipped_active - shipped_prior) / shipped_prior * 100) if shipped_prior > 0 else 0.0
+
     return {
         "sales": sales_active,
         "orders": orders_active,
@@ -155,16 +186,20 @@ def calculate_kpis(orders: pl.DataFrame, start: datetime.date, end: datetime.dat
         "orders_change": orders_change,
         "aov_change": aov_change,
         "items_sold": items_active,
-        "items_sold_change": items_change
+        "items_sold_change": items_change,
+        "shipped": shipped_active,
+        "shipped_change": shipped_change
     }
 
 # ----------------- DATA LOADING -----------------
 # Optimized loading check to prevent redundant re-fetching during sidebar transitions
-current_params = (selected_mode, date_range)
+active_dates = st.session_state["active_date_range"]
+current_params = (selected_mode, active_dates)
+
 if "last_loading_params" not in st.session_state or st.session_state["last_loading_params"] != current_params or "orders_df" not in st.session_state:
     with st.spinner("Fetching and processing store data..."):
         # Load from secrets or mock
-        data_dict = load_woocommerce_data(date_range, use_demo=st.session_state["use_demo"])
+        data_dict = load_woocommerce_data(active_dates, use_demo=st.session_state["use_demo"])
         
         st.session_state["orders_df"] = data_dict["orders"]
         st.session_state["products_df"] = data_dict["products"]
@@ -174,7 +209,7 @@ if "last_loading_params" not in st.session_state or st.session_state["last_loadi
         st.session_state["last_loading_params"] = current_params
         
         # Calculate and cache KPIs
-        st.session_state["kpis"] = calculate_kpis(data_dict["orders"], start_date, end_date)
+        st.session_state["kpis"] = calculate_kpis(data_dict["orders"], active_dates[0], active_dates[1])
 
 orders_df = st.session_state["orders_df"]
 store_name = st.session_state["store_name"]

@@ -19,6 +19,14 @@ store_name = st.session_state["store_name"]
 is_demo = st.session_state["is_demo"]
 kpis = st.session_state["kpis"]
 
+# Format date range for dynamic titles
+active_dates = st.session_state.get("active_date_range")
+date_subtitle = ""
+if active_dates and len(active_dates) == 2:
+    start_str = active_dates[0].strftime("%b %d, %Y")
+    end_str = active_dates[1].strftime("%b %d, %Y")
+    date_subtitle = f"({start_str})" if start_str == end_str else f"({start_str} - {end_str})"
+
 st.header("Overview Dashboard")
 
 # Metric cards row
@@ -37,10 +45,10 @@ with m_col1:
 with m_col2:
     st.markdown(
         render_kpi_card(
-            "Orders Placed", 
-            f"{kpis['orders']:,}", 
-            f"{kpis['orders_change']:+.1f}% vs prior period", 
-            "up" if kpis['orders_change'] >= 0 else "down"
+            "Orders Shipped", 
+            f"{kpis.get('shipped', 0):,}", 
+            f"{kpis.get('shipped_change', 0.0):+.1f}% vs prior period", 
+            "up" if kpis.get('shipped_change', 0.0) >= 0 else "down"
         ), 
         unsafe_allow_html=True
     )
@@ -71,7 +79,7 @@ st.write("")
 g_col1, g_col2 = st.columns([2, 1])
 
 with g_col1:
-    st.subheader("Revenue & Orders Trend")
+    st.subheader(f"Revenue & Orders Trend {date_subtitle}")
     if not orders_df.is_empty():
         # Aggregate sales by date
         daily_stats = (
@@ -120,7 +128,7 @@ with g_col1:
         st.info("No sales data available for the selected timeframe.")
 
 with g_col2:
-    st.subheader("Order Status Breakdown")
+    st.subheader(f"Order Status Breakdown {date_subtitle}")
     if not orders_df.is_empty():
         status_df = orders_df.group_by("status").agg(pl.len().alias("count"))
         
