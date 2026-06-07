@@ -29,7 +29,7 @@ with settings_col1:
         
     override_key = st.text_input("API Key Override", value=st.session_state["override_llm_key"], type="password", placeholder=key_placeholder)
     
-    if st.button("Save & Apply LLM Settings", width="stretch"):
+    if st.button("Save & Apply LLM Settings", use_container_width=True):
         st.session_state["override_llm_provider"] = provider
         st.session_state["override_llm_key"] = override_key
         st.success(f"LLM configurations applied! Provider set to: {provider}.")

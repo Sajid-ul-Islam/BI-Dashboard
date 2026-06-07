@@ -48,13 +48,13 @@ s_col_1, s_col_2, s_col_3 = st.columns(3)
 
 clicked_question = ""
 with s_col_1:
-    if st.button("Summarize sales trend & key KPIs", width="stretch"):
+    if st.button("Summarize sales trend & key KPIs", use_container_width=True):
         clicked_question = "Summarize sales trend & key KPIs"
 with s_col_2:
-    if st.button("Identify inventory risk & low stock", width="stretch"):
+    if st.button("Identify inventory risk & low stock", use_container_width=True):
         clicked_question = "Identify inventory risk & low stock"
 with s_col_3:
-    if st.button("How can we improve repeat customer rate?", width="stretch"):
+    if st.button("How can we improve repeat customer rate?", use_container_width=True):
         clicked_question = "How can we improve repeat customer rate based on our customer data?"
 
 # Chat Input

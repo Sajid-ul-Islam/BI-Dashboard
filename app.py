@@ -116,7 +116,7 @@ else: # Custom Range
 selected_date_range = (start_date, end_date)
 
 # Action Trigger for Filters & Sync
-if st.sidebar.button("🚀 Apply Filters & Sync Data", type="primary", width="stretch"):
+if st.sidebar.button("🚀 Apply Filters & Sync Data", type="primary", use_container_width=True):
     st.session_state["active_date_range"] = selected_date_range
     st.cache_data.clear()
     if "last_loading_params" in st.session_state:
