@@ -1,3 +1,14 @@
+---
+title: BI Dashboard
+emoji: 📊
+colorFrom: blue
+colorTo: indigo
+sdk: streamlit
+sdk_version: "1.42.0"
+app_file: app.py
+pinned: false
+---
+
 # WooCommerce Business Intelligence & RAG Dashboard
 
 A modern, production-grade Business Intelligence (BI) Dashboard for WooCommerce built in Streamlit. Powered by **Polars** for lightning-fast tabular data processing, **Plotly** for responsive and interactive visualizations, and an integrated **AI RAG (Retrieval-Augmented Generation) system** to query e-commerce statistics using natural language.
