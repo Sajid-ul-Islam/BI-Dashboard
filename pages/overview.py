@@ -55,22 +55,12 @@ with m_col3:
         unsafe_allow_html=True
     )
 with m_col4:
-    # Calculate Repeat Customer Rate
-    valid_orders = orders_df.filter(pl.col("status").is_in(["completed", "processing"]) & (pl.col("customer_id") != 0))
-    if valid_orders.height > 0:
-        c_counts = valid_orders.group_by("customer_email").agg(pl.len().alias("count"))
-        repeat_custs = c_counts.filter(pl.col("count") > 1).height
-        total_custs = c_counts.height
-        repeat_rate = (repeat_custs / total_custs * 100) if total_custs > 0 else 0.0
-    else:
-        repeat_rate = 0.0
-        
     st.markdown(
         render_kpi_card(
-            "Repeat Purchase Rate", 
-            f"{repeat_rate:.1f}%", 
-            "Registered Users", 
-            "neutral"
+            "Total Items Sold", 
+            f"{kpis['items_sold']:,.0f}", 
+            f"{kpis['items_sold_change']:+.1f}% vs prior period", 
+            "up" if kpis['items_sold_change'] >= 0 else "down"
         ), 
         unsafe_allow_html=True
     )
@@ -175,10 +165,8 @@ if not orders_df.is_empty():
             "total": st.column_config.NumberColumn("Amount", format="$%.2f"),
             "status": st.column_config.TextColumn("Status"),
             "items_count": st.column_config.NumberColumn("Items"),
-            "item_names": "Products Purchased"
+            "item_names": "Items Summary"
         },
         width="stretch",
         hide_index=True
     )
-else:
-    st.info("No recent orders.")

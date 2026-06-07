@@ -104,7 +104,8 @@ def calculate_kpis(orders: pl.DataFrame, start: datetime.date, end: datetime.dat
     if orders.is_empty():
         return {
             "sales": 0.0, "orders": 0, "aov": 0.0, "refund_rate": 0.0,
-            "sales_change": 0.0, "orders_change": 0.0, "aov_change": 0.0
+            "sales_change": 0.0, "orders_change": 0.0, "aov_change": 0.0,
+            "items_sold": 0, "items_sold_change": 0.0
         }
         
     # Active Period filter
@@ -140,6 +141,11 @@ def calculate_kpis(orders: pl.DataFrame, start: datetime.date, end: datetime.dat
     refunded_active = active_orders.filter(pl.col("status") == "refunded")["total"].sum()
     refund_rate = (refunded_active / (sales_active + refunded_active) * 100) if (sales_active + refunded_active) > 0 else 0.0
 
+    # Total Items Sold
+    items_active = valid_active["items_count"].sum()
+    items_prior = valid_prior["items_count"].sum()
+    items_change = ((items_active - items_prior) / items_prior * 100) if items_prior > 0 else 0.0
+
     return {
         "sales": sales_active,
         "orders": orders_active,
@@ -147,7 +153,9 @@ def calculate_kpis(orders: pl.DataFrame, start: datetime.date, end: datetime.dat
         "refund_rate": refund_rate,
         "sales_change": sales_change,
         "orders_change": orders_change,
-        "aov_change": aov_change
+        "aov_change": aov_change,
+        "items_sold": items_active,
+        "items_sold_change": items_change
     }
 
 # ----------------- DATA LOADING -----------------
@@ -209,13 +217,12 @@ pages = {
         st.Page("pages/products.py", title="Product Performance", icon="📦"),
     ],
     "AI Assistant": [
-        st.Page("pages/ai_copilot.py", title="AI BI Copilot (RAG)", icon="🤖"),
+        st.Page("pages/ai_copilot.py", title="AI Copilot", icon="🤖"),
     ],
-    "Configuration": [
+    "Settings": [
         st.Page("pages/settings.py", title="Settings", icon="⚙️"),
-    ]
+    ],
 }
 
-# Run multi-page navigation
 pg = st.navigation(pages)
 pg.run()
